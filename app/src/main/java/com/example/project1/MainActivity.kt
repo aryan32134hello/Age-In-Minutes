@@ -29,13 +29,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
     
-    fun clickDatePick(){
+    private fun clickDatePick(){
         val myCalender = Calendar.getInstance()
         val year = myCalender.get(Calendar.YEAR)
         val month = myCalender.get(Calendar.MONTH)
         val day = myCalender.get(Calendar.DAY_OF_MONTH)
 
-       DatePickerDialog(this,
+       val dpd = DatePickerDialog(this,
        DatePickerDialog.OnDateSetListener{
            view, selectedYear, selectedMonth, selectedDay ->
            val selectedDate = "$selectedDay/${selectedMonth+1}/$selectedYear"
@@ -47,20 +47,22 @@ class MainActivity : AppCompatActivity() {
 
            val sdf = SimpleDateFormat("dd/MM/yyyy",Locale.ENGLISH)
            val theDate = sdf.parse(selectedDate)
+           theDate?.let {
+               val selectedDateinMinutes = theDate.time / 60000 // time is millisecond so divide by 60000
+               val currentDate = sdf.parse(sdf.format(System.currentTimeMillis()))
+               currentDate?.let {
+                   val currentDateInMinutes = currentDate.time/60000
+                   val diffInMin = currentDateInMinutes - selectedDateinMinutes
+                   mintv?.text = diffInMin.toString()
+               }
 
-           val selectedDateinMinutes = theDate.time / 60000 // time is millisecond so divide by 60000
-           val currentDate = sdf.parse(sdf.format(System.currentTimeMillis()))
-           val currentDateinMinutes = currentDate.time/60000
-           val diffinMin = currentDateinMinutes - selectedDateinMinutes
-           if(diffinMin<0){
-               Toast.makeText(this,"Do you know the Future? Please select valid Date",Toast.LENGTH_LONG).show()
-               dtetv?.text = "Please select valid Date"
-               mintv?.text = "Can't Predict Future"
-           }else {
-               mintv?.text = diffinMin.toString()
            }
+
        },
-        year,month,day).show()
+        year,month,day)
+
+        dpd.datePicker.maxDate=System.currentTimeMillis()-86400000
+        dpd.show()
 
     }
 }
